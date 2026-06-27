@@ -11,6 +11,7 @@ describe('TippingService', () => {
   let mockTipRepo: any;
   let mockConfessionRepo: any;
   let mockStellarService: any;
+  let mockEventEmitter: any;
 
   beforeEach(() => {
     mockTipRepo = {
@@ -47,10 +48,15 @@ describe('TippingService', () => {
         .mockReturnValue('https://horizon/testnet/txs/tx123'),
     };
 
+    mockEventEmitter = {
+      emit: jest.fn(),
+    };
+
     service = new TippingService(
       mockTipRepo,
       mockConfessionRepo,
       mockStellarService,
+      mockEventEmitter,
     );
   });
 
@@ -119,7 +125,9 @@ describe('TippingService', () => {
       };
 
       mockConfessionRepo.findOne.mockResolvedValue({ id: confessionId });
-      mockTipRepo.findOne.mockResolvedValue(existingTip);
+      mockTipRepo.findOne
+        .mockResolvedValueOnce(null) // idempotency check returns null
+        .mockResolvedValueOnce(existingTip); // txId conflict check returns existingTip
 
       await expect(
         service.verifyAndRecordTip(confessionId, mockDto),

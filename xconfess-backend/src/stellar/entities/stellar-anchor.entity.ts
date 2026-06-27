@@ -11,6 +11,7 @@ export enum AnchorStatus {
   PENDING = 'pending',
   ANCHORED = 'anchored',
   FAILED = 'failed',
+  EXPIRED = 'expired',
 }
 
 @Entity('stellar_anchors')
