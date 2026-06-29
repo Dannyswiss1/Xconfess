@@ -57,12 +57,4 @@ export class CreateConfessionDto {
   @IsOptional()
   @IsString()
   idempotencyKey?: string;
-
-  @ApiPropertyOptional({
-    description: 'Category ID to assign this confession to.',
-    example: 'a1b2c3d4-...',
-  })
-  @IsOptional()
-  @IsString()
-  categoryId?: string;
 }

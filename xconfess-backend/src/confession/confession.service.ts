@@ -165,7 +165,6 @@ export class ConfessionService {
         moderationDetails: moderationResult.details,
         ...stellarData,
         ...(dto.idempotencyKey ? { idempotencyKey: dto.idempotencyKey } : {}),
-        ...(dto.categoryId ? { categoryId: dto.categoryId } : {}),
       });
 
       const savedConfession = await confessionRepo.save(conf);

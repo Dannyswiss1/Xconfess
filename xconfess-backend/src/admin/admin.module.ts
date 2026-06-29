@@ -23,7 +23,6 @@ import { Tip } from '../tipping/entities/tip.entity';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { StellarModule } from '../stellar/stellar.module';
-import { CategoryModule } from '../category/category.module';
 
 @Module({
   imports: [
@@ -41,7 +40,6 @@ import { CategoryModule } from '../category/category.module';
     AuditLogModule,
     NotificationsModule,
     StellarModule,
-    CategoryModule,
   ],
   controllers: [AdminController],
   providers: [

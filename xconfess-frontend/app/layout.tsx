@@ -23,7 +23,6 @@ import { WebSocketIndicator } from "@/app/components/common/WebSocketIndicator";
 
 import { NetworkStatusProvider } from "@/app/lib/providers/NetworkStatusProvider";
 import ShortcutsProvider from "@/app/components/common/ShortcutsProvider";
-import { ToastBridge } from "@/app/components/common/ToastBridge";
 
 export default function RootLayout({
   children,
@@ -49,7 +48,6 @@ export default function RootLayout({
               <NetworkStatusProvider>
                 <QueryProvider>
                   <ToastProvider>
-                    <ToastBridge />
                     <ShortcutsProvider>
                     <NetworkBanner />
                     <WebSocketIndicator />

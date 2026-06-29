@@ -66,7 +66,6 @@ export const DraftManager: React.FC<DraftManagerProps> = ({
         title: mostRecent.title,
         body: mostRecent.body,
         gender: mostRecent.gender,
-        categoryId: (mostRecent as any).categoryId,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,7 +95,6 @@ export const DraftManager: React.FC<DraftManagerProps> = ({
       title: currentDraft.title,
       body: currentDraft.body,
       gender: currentDraft.gender as Gender | undefined,
-      categoryId: (currentDraft as any).categoryId,
     };
 
     setSaveStatus("saving");
@@ -170,7 +168,6 @@ export const DraftManager: React.FC<DraftManagerProps> = ({
       title: draft.title,
       body: draft.body,
       gender: draft.gender,
-      categoryId: (draft as any).categoryId,
     });
     setSaveStatus("saved");
     setSaveMessage("Draft saved.");
