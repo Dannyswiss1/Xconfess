@@ -120,19 +120,28 @@ async function bootstrap() {
       .setVersion('1.0')
       .addBearerAuth()
       .addTag('Auth', 'Authentication endpoints')
+      .addTag('Users', 'User registration, profile, and settings')
       .addTag(
         'Confessions',
         'Confession CRUD, search, tags, and Stellar anchoring',
       )
+      .addTag('Comments', 'Comment CRUD and moderation')
       .addTag('Reactions', 'Emoji reactions on confessions')
       .addTag('Messages', 'Anonymous messaging between users')
       .addTag('Reports', 'Report creation and moderation')
       .addTag('Admin', 'Admin dashboard and RBAC operations')
+      .addTag('Admin - Moderation', 'AI moderation review and configuration')
+      .addTag('Admin - Comments', 'Admin comment approval and rejection')
+      .addTag('Analytics', 'Platform analytics and trending')
       .addTag('Tipping', 'XLM micro-tipping on Stellar')
+      .addTag('Stellar', 'Stellar blockchain integration')
+      .addTag('Health', 'Health check endpoints')
+      .addTag('Data Export', 'GDPR data export and download')
+      .addTag('Search Discovery', 'Saved searches and search history')
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/api-docs', app, document);
+    SwaggerModule.setup('api/docs', app, document);
   }
 
   const port = configService.get<number>('app.port', 3000);

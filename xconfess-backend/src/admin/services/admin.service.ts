@@ -5,7 +5,7 @@
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, In, Repository } from 'typeorm';
+import { EntityManager, In, Repository, LessThan } from 'typeorm';
 import { Report, ReportStatus, ReportType } from '../entities/report.entity'
 import { AnonymousConfession } from '../../confession/entities/confession.entity';
 import { User, UserRole } from '../../user/entities/user.entity';
@@ -693,6 +693,103 @@ export class AdminService {
         createdAt: t.createdAt,
       })),
     };
+  }
+
+  async getReportsCursor(
+    status?: ReportStatus,
+    type?: ReportType,
+    startDate?: Date,
+    endDate?: Date,
+    limit = 20,
+    cursor?: string,
+  ): Promise<CursorPaginatedResponseDto<Report>> {
+    const parsedCursor = decodeCursor<{ id: string; createdAt: string }>(cursor);
+    const take = Math.min(limit + 1, PAGINATION.MAX_LIMIT);
+
+    const query = this.reportRepository
+      .createQueryBuilder('report')
+      .leftJoinAndSelect('report.confession', 'confession')
+      .leftJoinAndSelect('report.reporter', 'reporter')
+      .leftJoinAndSelect('report.resolver', 'resolver')
+      .orderBy('report.createdAt', 'DESC')
+      .addOrderBy('report.id', 'DESC')
+      .take(take);
+
+    if (parsedCursor) {
+      query.andWhere(
+        '(report.createdAt < :cursorDate OR (report.createdAt = :cursorDate AND report.id < :cursorId))',
+        {
+          cursorDate: new Date(parsedCursor.createdAt),
+          cursorId: parsedCursor.id,
+        },
+      );
+    }
+
+    if (status) {
+      query.andWhere('report.status = :status', { status });
+    }
+    if (type) {
+      query.andWhere('report.type = :type', { type });
+    }
+    if (startDate) {
+      query.andWhere('report.createdAt >= :startDate', { startDate });
+    }
+    if (endDate) {
+      query.andWhere('report.createdAt <= :endDate', { endDate });
+    }
+
+    const reports = await query.getMany();
+    const hasMore = reports.length > limit;
+    if (hasMore) reports.pop();
+
+    const mapped = reports.map((r) => {
+      if (r.confession?.message) {
+        r.confession.message = this.safeDecryptConfessionMessage(r.confession.message);
+      }
+      return r;
+    });
+
+    const nextCursor = hasMore && reports.length > 0
+      ? encodeCursor({ id: reports[reports.length - 1].id, createdAt: reports[reports.length - 1].createdAt.toISOString() })
+      : null;
+
+    return new CursorPaginatedResponseDto(mapped, nextCursor, hasMore, limit);
+  }
+
+  async searchUsersCursor(
+    query: string,
+    limit = 20,
+    cursor?: string,
+  ): Promise<CursorPaginatedResponseDto<User>> {
+    const parsedCursor = decodeCursor<{ id: number; createdAt: string }>(cursor);
+    const take = Math.min(limit + 1, PAGINATION.MAX_LIMIT);
+
+    const qb = this.userRepository
+      .createQueryBuilder('user')
+      .where('user.username ILIKE :query', { query: `%${query}%` })
+      .orderBy('user.createdAt', 'DESC')
+      .addOrderBy('user.id', 'DESC')
+      .take(take);
+
+    if (parsedCursor) {
+      qb.andWhere(
+        '(user.createdAt < :cursorDate OR (user.createdAt = :cursorDate AND user.id < :cursorId))',
+        {
+          cursorDate: new Date(parsedCursor.createdAt),
+          cursorId: parsedCursor.id,
+        },
+      );
+    }
+
+    const users = await qb.getMany();
+    const hasMore = users.length > limit;
+    if (hasMore) users.pop();
+
+    const nextCursor = hasMore && users.length > 0
+      ? encodeCursor({ id: users[users.length - 1].id, createdAt: users[users.length - 1].createdAt.toISOString() })
+      : null;
+
+    return new CursorPaginatedResponseDto(users, nextCursor, hasMore, limit);
   }
 
   async getReportStats(): Promise<{
